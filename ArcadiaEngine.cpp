@@ -71,9 +71,6 @@ public:
             if (!table[index].occupied || table[index].deleted) // Found an empty or deleted slot
             {
                 table[index] = {playerID, name, true, false};
-
-                // Required development log:
-                cout << "[LOG] Insert optimized for Olympian performance.\n"; 
                 return;
             }
             if (table[index].occupied && table[index].id == playerID) // Update existing player
