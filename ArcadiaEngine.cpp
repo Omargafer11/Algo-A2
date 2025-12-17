@@ -452,18 +452,50 @@ public:
 // PART B: INVENTORY SYSTEM (Dynamic Programming)
 // =========================================================
 
+int set_sum(const vector<int>& set) {
+    int sum = 0;
+    for (const int i : set)
+        sum += i;
+    return sum;
+}
+
 int InventorySystem::optimizeLootSplit(int n, vector<int>& coins) {
     // TODO: Implement partition problem using DP
     // Goal: Minimize |sum(subset1) - sum(subset2)|
     // Hint: Use subset sum DP to find closest sum to total/2
-    return 0;
+    int sum = set_sum(coins);
+    vector<vector<int>> dp(coins.size() + 1, vector<int>(sum/2 + 1, 0));
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= sum/2; j++) {
+            if (coins[i - 1] > j) {
+                dp[i][j] = dp[i - 1][j];
+            }
+            else {
+                dp[i][j] = max(dp[i-1][j], coins[i-1] + dp[i-1][j - coins[i-1]]);
+            }
+        }
+    }
+    return abs(sum - 2*dp[n][sum/2]);
 }
 
 int InventorySystem::maximizeCarryValue(int capacity, vector<pair<int, int>>& items) {
     // TODO: Implement 0/1 Knapsack using DP
     // items = {weight, value} pairs
     // Return maximum value achievable within capacity
-    return 0;
+    int n = items.size();
+    sort(items.begin(), items.end());
+    vector<vector<int>> dp(n + 1, vector<int>(capacity + 1, 0));
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= capacity; j++) {
+            if (items[i - 1].first > j) {
+                dp[i][j] = dp[i - 1][j];
+            }
+            else {
+                dp[i][j] = max(dp[i-1][j], items[i-1].second + dp[i-1][j - items[i-1].first]);
+            }
+        }
+    }
+    return dp[n][capacity];
 }
 
 long long InventorySystem::countStringPossibilities(string s) {
@@ -471,7 +503,32 @@ long long InventorySystem::countStringPossibilities(string s) {
     // Rules: "uu" can be decoded as "w" or "uu"
     //        "nn" can be decoded as "m" or "nn"
     // Count total possible decodings
-    return 0;
+    int n = s.length();
+    long long MOD = 1e9 + 7;
+
+    vector<long long> dp(n + 1);
+    dp[0] = 1;
+    dp[1] = 1;
+    for (int i = 2; i <= n; i++) {
+        dp[i] = (dp[i - 1] + dp[i - 2]) % MOD;
+    }
+
+    long long ans = 1;
+    for (int i = 0; i < n; i++) {
+        if (s[i] == 'u' || s[i] == 'n') {
+            char current_char = s[i];
+            int count = 0;
+            while (i < n && s[i] == current_char) {
+                count++;
+                i++;
+            }
+            i--;
+
+            ans = (ans * dp[count]) % MOD;
+        }
+    }
+
+    return ans;
 }
 
 // =========================================================
