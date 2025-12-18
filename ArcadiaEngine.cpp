@@ -37,11 +37,9 @@ private:
     PlayerEntry table[TABLE_SIZE]; // each element initialized to {0, "", false, false}
 
 
-    // h1 --> Multiplicative Hash Function
+    // h1 --> Divison Method Hash Function
     int h1(int key) {
-        const double A = 0.6180339887; 
-        double frac = fmod(key * A, 1.0);
-        return int(TABLE_SIZE * frac);
+        return key % TABLE_SIZE;
     }
 
 
