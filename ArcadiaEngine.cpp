@@ -573,6 +573,13 @@ long long InventorySystem::countStringPossibilities(string s) {
     //        "nn" can be decoded as "m" or "nn"
     // Count total possible decodings
     int n = s.length();
+
+    if (n == 0) {return 1;}
+    for (int i = 0; i < n; i++) {
+        if (s[i] == 'm' || s[i] == 'w')
+            return 0;
+    }
+
     long long MOD = 1e9 + 7;
 
     vector<long long> dp(n + 1);
