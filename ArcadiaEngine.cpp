@@ -128,31 +128,102 @@ public:
 
 // --- 2. Leaderboard (Skip List) ---
 
-class ConcreteLeaderboard : public Leaderboard {
+class ConcreteLeaderboard  : public Leaderboard{
 private:
-    // TODO: Define your skip list node structure and necessary variables
-    // Hint: You'll need nodes with multiple forward pointers
+    struct Node {
+        int playerID;
+        int score;
+        vector<Node*> forward;
+    };
+
+    static const int MAX_LEVEL = 16;
+    float P = 0.5;
+    Node* header;
+    int level;
+    unordered_map<int, int> playerScores;
+
+    int randomLevel() {
+        int lvl = 1;
+        while ((double)rand() / RAND_MAX < P && lvl < MAX_LEVEL)
+            lvl++;
+        return lvl;
+    }
 
 public:
     ConcreteLeaderboard() {
-        // TODO: Initialize your skip list
+        level = 1;
+        header = new Node{-1, INT_MAX, vector<Node*>(MAX_LEVEL, nullptr)};
     }
 
-    void addScore(int playerID, int score) override {
-        // TODO: Implement skip list insertion
-        // Remember to maintain descending order by score
+    void addScore(int playerID, int score) override{
+        if (playerScores.count(playerID)) {
+            removePlayer(playerID);
+        }
+        
+        playerScores[playerID] = score;
+        vector<Node*> update(MAX_LEVEL, nullptr);
+        Node* cur = header;
+
+        for (int i = level - 1; i >= 0; i--) {
+            while (cur->forward[i] && (cur->forward[i]->score > score || 
+                  (cur->forward[i]->score == score && cur->forward[i]->playerID < playerID))) {
+                cur = cur->forward[i];
+            }
+            update[i] = cur;
+        }
+
+        int lvl = randomLevel();
+        if (lvl > level) {
+            for (int i = level; i < lvl; i++) update[i] = header;
+            level = lvl;
+        }
+
+        Node* newNode = new Node{playerID, score, vector<Node*>(lvl, nullptr)};
+        for (int i = 0; i < lvl; i++) {
+            newNode->forward[i] = update[i]->forward[i];
+            update[i]->forward[i] = newNode;
+        }
     }
 
     void removePlayer(int playerID) override {
-        // TODO: Implement skip list deletion
+        if (playerScores.find(playerID) == playerScores.end()) return;
+
+        int score = playerScores[playerID];
+        vector<Node*> update(MAX_LEVEL, nullptr);
+        Node* cur = header;
+
+        for (int i = level - 1; i >= 0; i--) {
+            while (cur->forward[i] && (cur->forward[i]->score > score || 
+                  (cur->forward[i]->score == score && cur->forward[i]->playerID < playerID))) {
+                cur = cur->forward[i];
+            }
+            update[i] = cur;
+        }
+
+        Node* target = cur->forward[0];
+        if (target && target->playerID == playerID) {
+            for (int i = 0; i < level; i++) {
+                if (update[i]->forward[i] != target) break;
+                update[i]->forward[i] = target->forward[i];
+            }
+            delete target;
+            playerScores.erase(playerID);
+        }
+
+        while (level > 1 && header->forward[level - 1] == nullptr)
+            level--;
     }
 
-    vector<int> getTopN(int n) override {
-        // TODO: Return top N player IDs in descending score order
-        return {};
+    vector<int> getTopN(int n)override {
+        vector<int> result;
+        Node* cur = header->forward[0];
+        while (cur && n--) {
+            result.push_back(cur->playerID);
+            cur = cur->forward[0];
+        }
+        return result;
     }
 };
-
 // --- 3. AuctionTree (Red-Black Tree) ---
 
 // Concrete implementation of AuctionTree using Red-Black Tree
