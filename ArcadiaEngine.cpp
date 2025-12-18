@@ -634,7 +634,7 @@ long long InventorySystem::countStringPossibilities(string s) {
 
     if (n == 0) {return 1;}
     for (int i = 0; i < n; i++) {
-        if (s[i] == 'm' || s[i] == 'w')
+        if (std::tolower(s[i]) == 'm' || std::tolower(s[i]) == 'w')
             return 0;
     }
 
@@ -649,10 +649,10 @@ long long InventorySystem::countStringPossibilities(string s) {
 
     long long ans = 1;
     for (int i = 0; i < n; i++) {
-        if (s[i] == 'u' || s[i] == 'n') {
+        if (std::tolower(s[i]) == 'u' || std::tolower(s[i]) == 'n') {
             char current_char = s[i];
             int count = 0;
-            while (i < n && s[i] == current_char) {
+            while (i < n && std::tolower(s[i]) == current_char) {
                 count++;
                 i++;
             }
